@@ -30,39 +30,6 @@ interface SuperstructureItem {
   }>;
 }
 
-const fallbackStructures: SuperstructureItem[] = [
-  {
-    id: "ss-fallback",
-    project: "Contemporary Executive Villa",
-    image:
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
-    mainImage:
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
-    media: [
-      {
-        id: 1,
-        image:
-          "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80",
-        isMain: true,
-        sortOrder: 0,
-      },
-      {
-        id: 2,
-        image:
-          "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
-        isMain: false,
-        sortOrder: 1,
-      },
-    ],
-    description: "Modern double-storey design with premium finishes.",
-    startingPrice: 142000,
-    options: [
-      { id: 1, size: "3 Bed", priceUsd: 142000, deposit20: 28400, installment24: 7100, installment36: 4733.33 },
-      { id: 2, size: "4 Bed", priceUsd: 168000, deposit20: 33600, installment24: 8400, installment36: 5600 },
-    ],
-  },
-];
-
 function IconBed() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -92,9 +59,11 @@ function isRoseGardensProject(project: string) {
 }
 
 export default function SuperstructuresSection() {
-  const [structures, setStructures] = useState<SuperstructureItem[]>(fallbackStructures);
-  const [activeId, setActiveId] = useState("ss-fallback");
+  const [structures, setStructures] = useState<SuperstructureItem[]>([]);
+  const [activeId, setActiveId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [isUnavailable, setIsUnavailable] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeMediaValue, setActiveMediaValue] = useState("");
   const [hydratedFromStorage, setHydratedFromStorage] = useState(false);
@@ -123,12 +92,19 @@ export default function SuperstructuresSection() {
         const data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
           setStructures(data);
+          setFetchError(null);
+          setIsUnavailable(false);
           setActiveId((prev) => {
             const exists = data.some((item: SuperstructureItem) => item.id === prev);
             return exists ? prev : data[0].id;
           });
+        } else {
+          setIsUnavailable(true);
+          setFetchError("No superstructures are available at the moment.");
         }
       } catch (error) {
+        setIsUnavailable(true);
+        setFetchError("Superstructure data is temporarily unavailable.");
         console.error("Error fetching superstructures:", error);
       } finally {
         setLoading(false);
@@ -138,10 +114,10 @@ export default function SuperstructuresSection() {
     fetchSuperstructures();
   }, []);
 
-  const active = useMemo(
-    () => structures.find((item) => item.id === activeId) ?? structures[0],
-    [activeId, structures]
-  );
+  const active = useMemo(() => {
+    if (structures.length === 0) return null;
+    return structures.find((item) => item.id === activeId) ?? structures[0];
+  }, [activeId, structures]);
 
   const formatMoney = (value: number) =>
     `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
@@ -156,9 +132,11 @@ export default function SuperstructuresSection() {
   }, [activeId, hydratedFromStorage]);
 
   const mediaItems =
-    active.media && active.media.length > 0
+    active && active.media && active.media.length > 0
       ? [...active.media].sort((a, b) => a.sortOrder - b.sortOrder)
-      : [{ id: 0, image: active.mainImage || active.image, isMain: true, sortOrder: 0 }];
+      : active
+        ? [{ id: 0, image: active.mainImage || active.image, isMain: true, sortOrder: 0 }]
+        : [];
 
   const getMediaValue = (media: (typeof mediaItems)[number]) =>
     (media.mediaType || "image") === "video" ? media.embedUrl || media.sourceUrl || "" : media.image;
@@ -168,10 +146,11 @@ export default function SuperstructuresSection() {
     mediaItems.find((media) => media.isMain) ||
     mediaItems[0];
   const isActiveVideo = (activeMedia?.mediaType || "image") === "video";
-  const chipukutuProject = isChipukutuProject(active.project);
-  const roseGardensProject = isRoseGardensProject(active.project);
+  const chipukutuProject = isChipukutuProject(active?.project || "");
+  const roseGardensProject = isRoseGardensProject(active?.project || "");
 
   useEffect(() => {
+    if (mediaItems.length === 0) return;
     const mediaValues = new Set(mediaItems.map((item) => getMediaValue(item)).filter(Boolean));
     if (activeMediaValue && mediaValues.has(activeMediaValue)) return;
     setActiveMediaValue(getMediaValue(mediaItems.find((item) => item.isMain) || mediaItems[0]));
@@ -185,6 +164,33 @@ export default function SuperstructuresSection() {
       console.error("Failed to persist active superstructure media:", error);
     }
   }, [activeMediaValue, hydratedFromStorage]);
+
+  if (isUnavailable || !active) {
+    return (
+      <section id="superstructures" className="relative overflow-hidden bg-[#f5f8ff] px-4 py-16 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-3xl border border-amber-200 bg-amber-50 p-10 text-center shadow-sm"
+          >
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700"
+            >
+              <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 9v4M12 17h.01" strokeLinecap="round" />
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              </svg>
+            </motion.div>
+            <h3 className="text-2xl font-semibold text-amber-900">Superstructure data unavailable</h3>
+            <p className="mt-2 text-sm text-amber-800">{fetchError || "No superstructures are available at the moment."}</p>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="superstructures" className="relative overflow-hidden bg-[#f5f8ff] px-4 py-16 sm:px-6 lg:px-10">

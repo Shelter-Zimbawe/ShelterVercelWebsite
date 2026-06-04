@@ -26,6 +26,14 @@ function isAllowedVisitDate(value: string) {
   return day === 2 || day === 4;
 }
 
+function isFutureOrToday(value: string) {
+  if (!value) return false;
+  const selected = new Date(`${value}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selected >= today;
+}
+
 export default function BookingForm({ onClose, standId, standName }: BookingFormProps) {
   const [stands, setStands] = useState<StandOption[]>([]);
   const [loadingStands, setLoadingStands] = useState(true);
@@ -101,11 +109,13 @@ export default function BookingForm({ onClose, standId, standName }: BookingForm
     }
 
     if (name === "preferredDate") {
-      setDateError(
-        value && !isAllowedVisitDate(value)
-          ? "Site visits are only available on Tuesdays and Thursdays."
-          : ""
-      );
+      if (value && !isFutureOrToday(value)) {
+        setDateError("Site visits cannot be booked for a past date.");
+      } else if (value && !isAllowedVisitDate(value)) {
+        setDateError("Site visits are only available on Tuesdays and Thursdays.");
+      } else {
+        setDateError("");
+      }
     }
 
     setFormData({
@@ -116,6 +126,11 @@ export default function BookingForm({ onClose, standId, standName }: BookingForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFutureOrToday(formData.preferredDate)) {
+      setDateError("Site visits cannot be booked for a past date.");
+      return;
+    }
+
     if (!isAllowedVisitDate(formData.preferredDate)) {
       setDateError("Site visits are only available on Tuesdays and Thursdays.");
       return;

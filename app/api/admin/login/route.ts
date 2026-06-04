@@ -18,12 +18,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!isValidAdminPassword(password)) {
+    if (!await isValidAdminPassword(password)) {
       return NextResponse.json({ error: "Invalid admin credentials." }, { status: 401 });
     }
 
     const response = NextResponse.json({ success: true });
-    response.cookies.set(ADMIN_SESSION_COOKIE, createAdminSessionValue(), {
+    response.cookies.set(ADMIN_SESSION_COOKIE, await createAdminSessionValue(), {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { ArrowRight, CheckCircle2, MapPin, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, MapPin, X, AlertTriangle } from "lucide-react";
 import BookingForm from "./BookingForm";
 
 interface PlotOption {
@@ -60,6 +60,7 @@ export default function ProductGallery() {
   const [selectedStand, setSelectedStand] = useState<Stand | null>(null);
   const [bookingStand, setBookingStand] = useState<Stand | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
 
   useEffect(() => {
@@ -71,11 +72,19 @@ export default function ProductGallery() {
       const response = await fetch('/api/stands');
       if (response.ok) {
         const data = await response.json();
-        setStandProducts(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setStandProducts(data);
+          setFetchError(null);
+        } else {
+          setStandProducts([]);
+          setFetchError("No stands are available at the moment.");
+        }
       } else {
+        setFetchError('Unable to load stands right now.');
         console.error('Failed to fetch stands');
       }
     } catch (error) {
+      setFetchError("Stand data is temporarily unavailable.");
       console.error('Error fetching stands:', error);
     } finally {
       setLoading(false);
@@ -97,12 +106,8 @@ export default function ProductGallery() {
   };
 
   const startPurchase = (stand: Stand) => {
-    const subject = encodeURIComponent(`Purchase inquiry for ${stand.name}`);
-    const body = encodeURIComponent(
-      `Hello Shelter Zimbabwe,%0D%0A%0D%0AI would like to start the purchase process for ${stand.name} in ${stand.location}.%0D%0A%0D%0AMy preferred option is:%0D%0A- Location: ${stand.location}%0D%0A- Direction: ${stand.direction}%0D%0A- Starting price: ${formatCurrency(stand.minimumPrice)}`
-    );
-
-    window.location.href = `mailto:sales@shelter.co.zw?subject=${subject}&body=${body}`;
+    const message = `How are you Shelter , I wanted to inquire on ${stand.name} in ${stand.location} (starting from ${formatCurrency(stand.minimumPrice)}).`;
+    window.open(`https://wa.me/263719551234?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
@@ -130,6 +135,22 @@ export default function ProductGallery() {
           <div className="text-center py-20">
             <div className="text-lg text-gray-600">Loading stands...</div>
           </div>
+        ) : fetchError ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-auto max-w-xl rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm"
+          >
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700"
+            >
+              <AlertTriangle className="h-7 w-7" />
+            </motion.div>
+            <h3 className="text-xl font-semibold text-amber-900">Stand data unavailable</h3>
+            <p className="mt-2 text-sm text-amber-800">{fetchError}</p>
+          </motion.div>
         ) : (
           <div className="overflow-x-auto pb-4">
             <div className="flex min-w-max gap-6 pr-2">

@@ -10,6 +10,14 @@ function isAllowedVisitDate(value: string) {
   return day === 2 || day === 4;
 }
 
+function isFutureOrToday(value: string) {
+  if (!value) return false;
+  const selected = new Date(`${value}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selected >= today;
+}
+
 export async function GET() {
   try {
     const bookings = db.prepare('SELECT * FROM bookings ORDER BY created_at DESC').all();
@@ -26,6 +34,22 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    const name = String(body.name || "").trim().slice(0, 120);
+    const email = String(body.email || "").trim().slice(0, 200);
+    const phone = String(body.phone || "").trim().slice(0, 30);
+    const message = String(body.message || "").slice(0, 1000);
+
+    if (!name || !email || !phone) {
+      return NextResponse.json({ error: "Name, email and phone are required." }, { status: 400 });
+    }
+
+    if (!isFutureOrToday(body.preferredDate)) {
+      return NextResponse.json(
+        { error: 'Site visits cannot be booked for a past date.' },
+        { status: 400 }
+      );
+    }
 
     if (!isAllowedVisitDate(body.preferredDate)) {
       return NextResponse.json(
@@ -53,13 +77,13 @@ export async function POST(request: Request) {
     `);
 
     const result = stmt.run(
-      body.name,
-      body.email,
-      body.phone,
+      name,
+      email,
+      phone,
       body.preferredDate,
       FIXED_PICKUP_TIME,
       selectedStand.name,
-      body.message || null,
+      message || null,
       selectedStand.id,
       selectedStand.name,
       'pending'

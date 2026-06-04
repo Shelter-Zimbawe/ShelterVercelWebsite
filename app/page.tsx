@@ -7,10 +7,15 @@ import About from "@/components/About";
 import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import ScrollRevealSection from "@/components/ScrollRevealSection";
+import KumbiModal from "@/components/KumbiModal";
+import KumbiSection from "@/components/KumbiSection";
+import PageAnalytics from "@/components/PageAnalytics";
 
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <PageAnalytics />
+      <KumbiModal />
       <Navbar />
       <ScrollRevealSection>
         <Hero />
@@ -21,6 +26,7 @@ export default function Home() {
       <ScrollRevealSection delay={0.08}>
         <SuperstructuresSection />
       </ScrollRevealSection>
+      <KumbiSection />
       <ScrollRevealSection delay={0.1}>
         <Features />
       </ScrollRevealSection>

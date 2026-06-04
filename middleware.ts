@@ -8,10 +8,12 @@ function isProtectedApiRoute(pathname: string, method: string) {
   if (pathname.startsWith("/api/stands/") && (method === "PUT" || method === "DELETE")) return true;
   if (pathname === "/api/superstructures" && method === "POST") return true;
   if (pathname.startsWith("/api/superstructures/") && (method === "PUT" || method === "DELETE")) return true;
+  if (pathname === "/api/feedback" && method === "GET") return true;
+  if (pathname === "/api/analytics" && method === "GET") return true;
   return false;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAdminPage = pathname === "/admin" || pathname.startsWith("/admin/");
   const isAdminLoginPage = pathname === "/admin/login";
@@ -21,7 +23,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (hasAdminSession(request)) {
+  if (await hasAdminSession(request)) {
     if (isAdminLoginPage) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }

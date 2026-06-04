@@ -390,6 +390,29 @@ export function initDatabase() {
     )
   `);
 
+  // Feedback table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+      comment TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_feedback_rating ON feedback(rating)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at DESC)`);
+
+  // Analytics events table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_analytics_event ON analytics_events(event)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics_events(created_at DESC)`);
+
   // Create indexes
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_stands_category ON stands(category);

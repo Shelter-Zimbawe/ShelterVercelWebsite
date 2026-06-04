@@ -1,9 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, Layers3, Users, Edit, Plus, Trash2 } from "lucide-react";
+import { Building2, Layers3, Users, Edit, Plus, Trash2, BarChart2, MessageSquare } from "lucide-react";
 
-type Tab = "stands" | "superstructures" | "bookings";
+type Tab = "stands" | "superstructures" | "bookings" | "analytics" | "feedback";
+
+interface FeedbackItem {
+  id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
+interface FeedbackData {
+  total: number;
+  average: string;
+  distribution: Array<{ star: number; count: number }>;
+  reviews: FeedbackItem[];
+}
+
+interface Analytics {
+  page_visits: number;
+  kumbi_modal_views: number;
+  kumbi_inquiries: number;
+  today_visits: number;
+  last_7_days: Array<{ day: string; visits: number }>;
+}
 
 interface Stand {
   id: number;
@@ -75,7 +97,20 @@ interface Booking {
   id: number;
   name: string;
   email: string;
+  preferred_date?: string;
   status: string;
+}
+
+function formatVisitDate(value?: string) {
+  if (!value) return "-";
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 interface FormState {
@@ -211,6 +246,8 @@ export default function AdminDashboard() {
   const [stands, setStands] = useState<Stand[]>([]);
   const [superstructures, setSuperstructures] = useState<Superstructure[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [feedbackData, setFeedbackData] = useState<FeedbackData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -245,8 +282,12 @@ export default function AdminDashboard() {
         setStands(await fetchJson<Stand[]>("/api/stands"));
       } else if (tab === "superstructures") {
         setSuperstructures(await fetchJson<Superstructure[]>("/api/superstructures"));
-      } else {
+      } else if (tab === "bookings") {
         setBookings(await fetchJson<Booking[]>("/api/bookings"));
+      } else if (tab === "analytics") {
+        setAnalytics(await fetchJson<Analytics>("/api/analytics"));
+      } else {
+        setFeedbackData(await fetchJson<FeedbackData>("/api/feedback"));
       }
     } catch (err) {
       console.error("Dashboard refresh failed:", err);
@@ -421,6 +462,8 @@ export default function AdminDashboard() {
           <button onClick={() => setTab("stands")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "stands" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Building2 className="mr-2 inline-block h-5 w-5" />Stands</button>
           <button onClick={() => setTab("superstructures")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "superstructures" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Layers3 className="mr-2 inline-block h-5 w-5" />Superstructures</button>
           <button onClick={() => setTab("bookings")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "bookings" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Users className="mr-2 inline-block h-5 w-5" />Bookings</button>
+          <button onClick={() => setTab("analytics")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "analytics" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><BarChart2 className="mr-2 inline-block h-5 w-5" />Analytics</button>
+          <button onClick={() => setTab("feedback")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "feedback" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><MessageSquare className="mr-2 inline-block h-5 w-5" />Feedback</button>
         </div>
 
         {error && (
@@ -545,16 +588,70 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {tab === "analytics" && (
+              <div className="p-6">
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">Site Analytics</h2>
+                  <button onClick={refresh} className="rounded-lg border px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50">Refresh</button>
+                </div>
+                {analytics ? (
+                  <div className="space-y-6">
+                    {/* Stat cards */}
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                      {[
+                        { label: "Total Visits", value: analytics.page_visits, color: "#2652a2", icon: "🌐" },
+                        { label: "Today's Visits", value: analytics.today_visits, color: "#00aeed", icon: "📅" },
+                        { label: "KUMBI Inquiries", value: analytics.kumbi_inquiries, color: "#25D366", icon: "💬" },
+                      ].map((stat) => (
+                        <div key={stat.label} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                          <div className="mb-2 text-2xl">{stat.icon}</div>
+                          <div className="text-3xl font-extrabold" style={{ color: stat.color }}>{stat.value.toLocaleString()}</div>
+                          <div className="mt-1 text-sm text-gray-500">{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Last 7 days bar chart */}
+                    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                      <h3 className="mb-4 font-semibold text-gray-800">Visits — Last 7 Days</h3>
+                      {analytics.last_7_days.length === 0 ? (
+                        <p className="text-sm text-gray-400">No visits recorded yet.</p>
+                      ) : (
+                        <div className="flex items-end gap-2">
+                          {analytics.last_7_days.map((d) => {
+                            const max = Math.max(...analytics.last_7_days.map((x) => x.visits), 1);
+                            const pct = Math.round((d.visits / max) * 100);
+                            return (
+                              <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
+                                <span className="text-xs font-bold text-gray-700">{d.visits}</span>
+                                <div className="w-full rounded-t-md" style={{ height: `${Math.max(pct, 4)}px`, background: "linear-gradient(to top, #2652a2, #00aeed)", minHeight: "4px", maxHeight: "120px", transition: "height 0.4s" }} />
+                                <span className="text-[10px] text-gray-400">{d.day.slice(5)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-gray-400">Visits are tracked once per browser session. KUMBI inquiries are tracked when users click "Inquire on WhatsApp" on the KUMBI modal.</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">Loading analytics...</p>
+                )}
+              </div>
+            )}
+
             {tab === "bookings" && (
               <div className="p-6">
                 <h2 className="mb-6 text-2xl font-bold text-gray-900">Bookings</h2>
                 <table className="w-full">
-                  <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Email</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
+                  <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Email</th><th className="px-4 py-3 text-left">Site Visit Date</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
                   <tbody>
                     {bookings.map((b) => (
                       <tr key={b.id} className="border-b">
                         <td className="px-4 py-3">{b.name}</td>
                         <td className="px-4 py-3">{b.email}</td>
+                        <td className="px-4 py-3">{formatVisitDate(b.preferred_date)}</td>
                         <td className="px-4 py-3">{b.status}</td>
                         <td className="px-4 py-3">
                           <select value={b.status} onChange={(e) => updateBooking(b.id, e.target.value)} className="rounded border px-2 py-1 text-xs">
@@ -567,6 +664,60 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {tab === "feedback" && (
+              <div className="p-6">
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">Customer Feedback</h2>
+                  <button onClick={refresh} className="rounded-lg border px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50">Refresh</button>
+                </div>
+                {feedbackData ? (
+                  <div className="space-y-6">
+                    {/* Summary */}
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex-1 min-w-[140px] rounded-2xl border border-gray-100 bg-white p-5 shadow-sm text-center">
+                        <div className="text-4xl font-extrabold text-amber-400">{feedbackData.average}</div>
+                        <div className="mt-1 flex justify-center gap-0.5 text-amber-400">
+                          {[1,2,3,4,5].map((s) => <span key={s} style={{ opacity: s <= Math.round(Number(feedbackData.average)) ? 1 : 0.25 }}>★</span>)}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500">{feedbackData.total} review{feedbackData.total !== 1 ? "s" : ""}</div>
+                      </div>
+                      <div className="flex-1 min-w-[200px] rounded-2xl border border-gray-100 bg-white p-5 shadow-sm space-y-1.5">
+                        {feedbackData.distribution.map(({ star, count }) => (
+                          <div key={star} className="flex items-center gap-2 text-sm">
+                            <span className="w-4 text-right text-gray-500">{star}</span>
+                            <span className="text-amber-400">★</span>
+                            <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                              <div className="h-full rounded-full bg-amber-400 transition-all" style={{ width: feedbackData.total ? `${(count / feedbackData.total) * 100}%` : "0%" }} />
+                            </div>
+                            <span className="w-5 text-gray-500">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Reviews list */}
+                    <div className="space-y-3">
+                      {feedbackData.reviews.length === 0 ? (
+                        <p className="text-sm text-gray-400">No feedback submitted yet.</p>
+                      ) : feedbackData.reviews.map((r) => (
+                        <div key={r.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-0.5 text-amber-400">
+                              {[1,2,3,4,5].map((s) => <span key={s} style={{ opacity: s <= r.rating ? 1 : 0.2 }}>★</span>)}
+                            </div>
+                            <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}</span>
+                          </div>
+                          {r.comment && <p className="mt-2 text-sm text-gray-700">{r.comment}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">Loading feedback...</p>
+                )}
               </div>
             )}
           </div>
