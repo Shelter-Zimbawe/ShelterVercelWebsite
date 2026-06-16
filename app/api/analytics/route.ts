@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/lib/db";
+import sql from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     if (!event || typeof event !== "string") {
       return NextResponse.json({ error: "Invalid event" }, { status: 400 });
     }
-    db.prepare("INSERT INTO analytics_events (event) VALUES (?)").run(event);
+    await sql`INSERT INTO analytics_events (event) VALUES (${event})`;
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
@@ -16,30 +16,33 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const count = (event: string) =>
-      (db.prepare("SELECT COUNT(*) as n FROM analytics_events WHERE event = ?").get(event) as { n: number }).n;
+    const countRow = async (event: string) => {
+      const [row] = await sql`
+        SELECT COUNT(*) :: integer AS n FROM analytics_events WHERE event = ${event}
+      `;
+      return Number(row.n);
+    };
 
-    const todayVisits = (
-      db
-        .prepare(
-          "SELECT COUNT(*) as n FROM analytics_events WHERE event = 'page_visit' AND DATE(created_at) = DATE('now')"
-        )
-        .get() as { n: number }
-    ).n;
+    const [todayRow] = await sql`
+      SELECT COUNT(*) :: integer AS n
+      FROM analytics_events
+      WHERE event = 'page_visit' AND DATE(created_at) = CURRENT_DATE
+    `;
 
-    const last7Days = (
-      db
-        .prepare(
-          "SELECT DATE(created_at) as day, COUNT(*) as visits FROM analytics_events WHERE event = 'page_visit' AND created_at >= DATE('now', '-6 days') GROUP BY day ORDER BY day ASC"
-        )
-        .all() as Array<{ day: string; visits: number }>
-    );
+    const last7Days = await sql`
+      SELECT DATE(created_at) AS day, COUNT(*) :: integer AS visits
+      FROM analytics_events
+      WHERE event = 'page_visit'
+        AND created_at >= CURRENT_DATE - INTERVAL '6 days'
+      GROUP BY day
+      ORDER BY day ASC
+    `;
 
     return NextResponse.json({
-      page_visits: count("page_visit"),
-      kumbi_modal_views: count("kumbi_modal_view"),
-      kumbi_inquiries: count("kumbi_inquiry"),
-      today_visits: todayVisits,
+      page_visits: await countRow("page_visit"),
+      kumbi_modal_views: await countRow("kumbi_modal_view"),
+      kumbi_inquiries: await countRow("kumbi_inquiry"),
+      today_visits: Number(todayRow.n),
       last_7_days: last7Days,
     });
   } catch {

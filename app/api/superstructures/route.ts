@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import sql from "@/lib/db";
 
 function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
@@ -95,56 +95,25 @@ function normalizeMedia(input: unknown, fallbackMainImage: string) {
         const url = String((item as any)?.sourceUrl || (item as any)?.url || "").trim();
         const video = normalizeVideo(url);
         if (!video) return null;
-        return {
-          mediaType: "video" as MediaType,
-          image: "",
-          sourceUrl: video.sourceUrl,
-          embedUrl: video.embedUrl,
-          provider: video.provider,
-          isMain: false,
-          sortOrder,
-        };
+        return { mediaType: "video" as MediaType, image: "", sourceUrl: video.sourceUrl, embedUrl: video.embedUrl, provider: video.provider, isMain: false, sortOrder };
       }
       const image = String((item as any)?.image || (item as any)?.url || "").trim();
       if (!image) return null;
-      return {
-        mediaType: "image" as MediaType,
-        image,
-        sourceUrl: image,
-        embedUrl: "",
-        provider: "",
-        isMain: Boolean((item as any)?.isMain),
-        sortOrder,
-      };
+      return { mediaType: "image" as MediaType, image, sourceUrl: image, embedUrl: "", provider: "", isMain: Boolean((item as any)?.isMain), sortOrder };
     })
     .filter(Boolean) as Array<{
-      mediaType: MediaType;
-      image: string;
-      sourceUrl: string;
-      embedUrl: string;
-      provider: string;
-      isMain: boolean;
-      sortOrder: number;
+      mediaType: MediaType; image: string; sourceUrl: string;
+      embedUrl: string; provider: string; isMain: boolean; sortOrder: number;
     }>;
 
   const images = normalized.filter((item) => item.mediaType === "image");
   if (images.length === 0 && fallbackMainImage) {
-    normalized.unshift({
-      mediaType: "image",
-      image: fallbackMainImage,
-      sourceUrl: fallbackMainImage,
-      embedUrl: "",
-      provider: "",
-      isMain: true,
-      sortOrder: 0,
-    });
+    normalized.unshift({ mediaType: "image", image: fallbackMainImage, sourceUrl: fallbackMainImage, embedUrl: "", provider: "", isMain: true, sortOrder: 0 });
   }
-
   if (!normalized.some((item) => item.isMain && item.mediaType === "image")) {
     const firstImage = normalized.find((item) => item.mediaType === "image");
     if (firstImage) firstImage.isMain = true;
   }
-
   return normalized;
 }
 
@@ -157,11 +126,9 @@ function buildGroupedSuperstructures(rows: any[], mediaRows: any[]) {
   }
 
   const grouped = new Map<string, any>();
-
   for (const row of rows) {
     const groupCode = row.group_code || `ss-${row.id}`;
     const existing = grouped.get(groupCode);
-
     if (!existing) {
       const media = (mediaByGroupCode.get(groupCode) || [])
         .map((item) => ({
@@ -187,7 +154,6 @@ function buildGroupedSuperstructures(rows: any[], mediaRows: any[]) {
       });
       continue;
     }
-
     existing.options.push(serializeOption(row));
   }
 
@@ -200,25 +166,12 @@ function buildGroupedSuperstructures(rows: any[], mediaRows: any[]) {
 
 export async function GET() {
   try {
-    const rows = db
-      .prepare(
-        `
-        SELECT *
-        FROM superstructure_projects
-        ORDER BY id ASC
-      `
-      )
-      .all();
-    const mediaRows = db
-      .prepare(
-        `
-        SELECT *
-        FROM superstructure_media
-        ORDER BY group_code ASC, sort_order ASC, id ASC
-      `
-      )
-      .all();
-
+    const rows = await sql`
+      SELECT * FROM superstructure_projects ORDER BY id ASC
+    `;
+    const mediaRows = await sql`
+      SELECT * FROM superstructure_media ORDER BY group_code ASC, sort_order ASC, id ASC
+    `;
     return NextResponse.json(buildGroupedSuperstructures(rows, mediaRows));
   } catch (error) {
     console.error("Error fetching superstructures:", error);
@@ -233,14 +186,9 @@ export async function POST(request: Request) {
     const project = String(body.project || "").trim();
     const image = String(body.mainImage || body.image || "").trim();
     const description = String(body.description || "").trim();
-    const options = Array.isArray(body.options) ? body.options : [
-      {
-        size: body.size,
-        priceUsd: body.priceUsd,
-        installment24: body.installment24,
-        installment36: body.installment36,
-      },
-    ];
+    const options = Array.isArray(body.options)
+      ? body.options
+      : [{ size: body.size, priceUsd: body.priceUsd, installment24: body.installment24, installment36: body.installment36 }];
 
     if (!project || !description || options.length === 0) {
       return NextResponse.json({ error: "Invalid superstructure payload" }, { status: 400 });
@@ -260,54 +208,38 @@ export async function POST(request: Request) {
     }
 
     const groupCode = `ss-${Date.now()}-${Math.round(Math.random() * 100000)}`;
-    const insertStmt = db.prepare(
-      `
-      INSERT INTO superstructure_projects (
-        group_code, project, size, price_usd, deposit_20, installment_24, installment_36, image, description
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
-    );
 
     for (const option of normalizedOptions) {
       const deposit20 = calculateDepositForProject(project, option.priceUsd);
-      insertStmt.run(
-        groupCode,
-        project,
-        option.size,
-        option.priceUsd,
-        deposit20,
-        option.installment24,
-        option.installment36,
-        image,
-        description
-      );
+      await sql`
+        INSERT INTO superstructure_projects (
+          group_code, project, size, price_usd, deposit_20, installment_24, installment_36, image, description
+        ) VALUES (
+          ${groupCode}, ${project}, ${option.size}, ${option.priceUsd},
+          ${deposit20}, ${option.installment24}, ${option.installment36},
+          ${image}, ${description}
+        )
+      `;
     }
 
     const normalizedMedia = normalizeMedia(body.media, image);
-    const insertMediaStmt = db.prepare(`
-      INSERT INTO superstructure_media (group_code, image, media_type, source_url, embed_url, provider, is_main, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
     for (const media of normalizedMedia) {
-      insertMediaStmt.run(
-        groupCode,
-        media.image,
-        media.mediaType,
-        media.sourceUrl,
-        media.embedUrl,
-        media.provider,
-        media.isMain ? 1 : 0,
-        media.sortOrder
-      );
+      await sql`
+        INSERT INTO superstructure_media (
+          group_code, image, media_type, source_url, embed_url, provider, is_main, sort_order
+        ) VALUES (
+          ${groupCode}, ${media.image}, ${media.mediaType}, ${media.sourceUrl},
+          ${media.embedUrl}, ${media.provider}, ${media.isMain ? 1 : 0}, ${media.sortOrder}
+        )
+      `;
     }
 
-    const insertedRows = db
-      .prepare("SELECT * FROM superstructure_projects WHERE group_code = ? ORDER BY id ASC")
-      .all(groupCode);
-    const insertedMediaRows = db
-      .prepare("SELECT * FROM superstructure_media WHERE group_code = ? ORDER BY sort_order ASC, id ASC")
-      .all(groupCode);
+    const insertedRows = await sql`
+      SELECT * FROM superstructure_projects WHERE group_code = ${groupCode} ORDER BY id ASC
+    `;
+    const insertedMediaRows = await sql`
+      SELECT * FROM superstructure_media WHERE group_code = ${groupCode} ORDER BY sort_order ASC, id ASC
+    `;
 
     return NextResponse.json(buildGroupedSuperstructures(insertedRows, insertedMediaRows)[0], { status: 201 });
   } catch (error) {

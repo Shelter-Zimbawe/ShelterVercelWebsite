@@ -216,7 +216,7 @@ export default function SuperstructuresSection() {
                 {(activeMedia?.mediaType || "image") === "video" ? (
                   <motion.div
                     key={`${active.id}-${getMediaValue(activeMedia)}`}
-                    className="h-[620px] w-full bg-black"
+                    className="h-[420px] w-full bg-black sm:h-[480px] lg:h-[620px]"
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 1.02 }}
@@ -235,7 +235,7 @@ export default function SuperstructuresSection() {
                     key={`${active.id}-${getMediaValue(activeMedia)}`}
                     src={activeMedia?.image || active.mainImage || active.image}
                     alt={active.project}
-                    className="h-[620px] w-full object-cover"
+                    className="h-[420px] w-full object-cover sm:h-[480px] lg:h-[620px]"
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 1.02 }}

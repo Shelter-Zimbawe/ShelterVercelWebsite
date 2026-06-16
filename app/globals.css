@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "lenis/dist/lenis.css";
 
 :root {
   --background: #ffffff;
@@ -31,9 +32,11 @@ body {
   }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* Smooth scrolling is handled by Lenis (see components/SmoothScroll.tsx) —
+   native scroll-behavior is intentionally left out so it doesn't fight Lenis's
+   inertia-based scrolling. */
+html.lenis {
+  scroll-behavior: auto !important;
 }
 
 /* Custom scrollbar */
@@ -94,6 +97,70 @@ html {
 
 .animate-slide {
   animation: slide 20s linear infinite;
+}
+
+/* Branded Leaflet map pins (Shelter stand locations) */
+.shelter-leaflet-pin {
+  background: transparent;
+  border: none;
+}
+
+.shelter-pin-wrap {
+  position: relative;
+  display: block;
+}
+
+.shelter-pin-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #2652a2, #00aeed);
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(38, 82, 162, 0.45);
+  transition: all 0.25s ease;
+}
+
+.shelter-pin-dot-active {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #00aeed, #29ddda);
+  box-shadow: 0 6px 18px rgba(0, 174, 237, 0.55);
+}
+
+.shelter-pin-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  background: rgba(38, 82, 162, 0.35);
+  animation: shelter-pin-pulse 2.4s ease-out infinite;
+}
+
+.shelter-pin-pulse-active {
+  background: rgba(0, 174, 237, 0.4);
+  animation-duration: 1.6s;
+}
+
+@keyframes shelter-pin-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(2.6);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.6);
+    opacity: 0;
+  }
 }
 
 /* Simple fade-in animation */

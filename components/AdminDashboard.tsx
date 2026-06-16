@@ -458,12 +458,12 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        <div className="mb-6 flex gap-4 border-b border-gray-200">
-          <button onClick={() => setTab("stands")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "stands" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Building2 className="mr-2 inline-block h-5 w-5" />Stands</button>
-          <button onClick={() => setTab("superstructures")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "superstructures" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Layers3 className="mr-2 inline-block h-5 w-5" />Superstructures</button>
-          <button onClick={() => setTab("bookings")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "bookings" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Users className="mr-2 inline-block h-5 w-5" />Bookings</button>
-          <button onClick={() => setTab("analytics")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "analytics" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><BarChart2 className="mr-2 inline-block h-5 w-5" />Analytics</button>
-          <button onClick={() => setTab("feedback")} className={`border-b-2 px-6 py-3 font-semibold ${tab === "feedback" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><MessageSquare className="mr-2 inline-block h-5 w-5" />Feedback</button>
+        <div className="mb-6 flex gap-1 overflow-x-auto border-b border-gray-200 sm:gap-4">
+          <button onClick={() => setTab("stands")} className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold sm:px-6 sm:text-base ${tab === "stands" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Building2 className="mr-2 inline-block h-5 w-5" />Stands</button>
+          <button onClick={() => setTab("superstructures")} className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold sm:px-6 sm:text-base ${tab === "superstructures" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Layers3 className="mr-2 inline-block h-5 w-5" />Superstructures</button>
+          <button onClick={() => setTab("bookings")} className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold sm:px-6 sm:text-base ${tab === "bookings" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><Users className="mr-2 inline-block h-5 w-5" />Bookings</button>
+          <button onClick={() => setTab("analytics")} className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold sm:px-6 sm:text-base ${tab === "analytics" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><BarChart2 className="mr-2 inline-block h-5 w-5" />Analytics</button>
+          <button onClick={() => setTab("feedback")} className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold sm:px-6 sm:text-base ${tab === "feedback" ? "border-[#29ddda] text-[#29ddda]" : "border-transparent text-gray-600"}`}><MessageSquare className="mr-2 inline-block h-5 w-5" />Feedback</button>
         </div>
 
         {error && (
@@ -488,35 +488,37 @@ export default function AdminDashboard() {
                     New Stand
                   </button>
                 </div>
-                <table className="w-full">
-                  <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Price</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
-                  <tbody>
-                    {stands.map((s) => (
-                      <tr key={s.id} className="border-b">
-                        <td className="px-4 py-3">{s.name}</td>
-                        <td className="px-4 py-3">{s.minimumPrice ? `From $${s.minimumPrice.toLocaleString()}` : s.price}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => openEditStand(s)}
-                              className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => deleteStand(s.id)}
-                              className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[480px]">
+                    <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Price</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
+                    <tbody>
+                      {stands.map((s) => (
+                        <tr key={s.id} className="border-b">
+                          <td className="px-4 py-3">{s.name}</td>
+                          <td className="px-4 py-3">{s.minimumPrice ? `From $${s.minimumPrice.toLocaleString()}` : s.price}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => openEditStand(s)}
+                                className="inline-flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteStand(s.id)}
+                                className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 
@@ -526,65 +528,67 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold text-gray-900">Superstructures</h2>
                   <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-lg bg-[#29ddda] px-4 py-2 font-semibold text-white"><Plus className="h-4 w-4" />New Superstructure</button>
                 </div>
-                <table className="w-full">
-                  <thead><tr className="border-b"><th className="px-4 py-3 text-left">Project</th><th className="px-4 py-3 text-left">Gallery Preview</th><th className="px-4 py-3 text-left">Size</th><th className="px-4 py-3 text-left">Price USD</th><th className="px-4 py-3 text-left">20% Deposit</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
-                  <tbody>
-                    {superstructures.map((item) => {
-                      const chipukutu = isChipukutuProject(item.project);
-                      return (
-                      <tr key={item.id} className="border-b">
-                        <td className="px-4 py-3">{item.project}</td>
-                        <td className="px-4 py-3">
-                          <div className="max-w-[320px]">
-                            <img
-                              src={item.mainImage || item.image}
-                              alt={`${item.project} main`}
-                              className="mb-2 h-16 w-28 rounded-lg object-cover"
-                            />
-                            <div className="flex gap-2 overflow-x-auto pb-1">
-                              {(item.media && item.media.length > 0
-                                ? [...item.media].sort((a, b) => a.sortOrder - b.sortOrder)
-                                : [{ id: 0, image: item.mainImage || item.image, isMain: true, sortOrder: 0 }]
-                              ).map((media) => {
-                                const mediaType = media.mediaType || "image";
-                                if (mediaType === "video") {
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px]">
+                    <thead><tr className="border-b"><th className="px-4 py-3 text-left">Project</th><th className="px-4 py-3 text-left">Gallery Preview</th><th className="px-4 py-3 text-left">Size</th><th className="px-4 py-3 text-left">Price USD</th><th className="px-4 py-3 text-left">20% Deposit</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
+                    <tbody>
+                      {superstructures.map((item) => {
+                        const chipukutu = isChipukutuProject(item.project);
+                        return (
+                        <tr key={item.id} className="border-b">
+                          <td className="px-4 py-3">{item.project}</td>
+                          <td className="px-4 py-3">
+                            <div className="max-w-[320px]">
+                              <img
+                                src={item.mainImage || item.image}
+                                alt={`${item.project} main`}
+                                className="mb-2 h-16 w-28 rounded-lg object-cover"
+                              />
+                              <div className="flex gap-2 overflow-x-auto pb-1">
+                                {(item.media && item.media.length > 0
+                                  ? [...item.media].sort((a, b) => a.sortOrder - b.sortOrder)
+                                  : [{ id: 0, image: item.mainImage || item.image, isMain: true, sortOrder: 0 }]
+                                ).map((media) => {
+                                  const mediaType = media.mediaType || "image";
+                                  if (mediaType === "video") {
+                                    return (
+                                      <a
+                                        key={`${item.id}-preview-${media.id}`}
+                                        href={media.sourceUrl || media.embedUrl || "#"}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex h-12 w-16 flex-shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-900 text-[10px] font-semibold uppercase tracking-[0.08em] text-white"
+                                      >
+                                        Video
+                                      </a>
+                                    );
+                                  }
                                   return (
-                                    <a
+                                    <img
                                       key={`${item.id}-preview-${media.id}`}
-                                      href={media.sourceUrl || media.embedUrl || "#"}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="flex h-12 w-16 flex-shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-900 text-[10px] font-semibold uppercase tracking-[0.08em] text-white"
-                                    >
-                                      Video
-                                    </a>
+                                      src={media.image}
+                                      alt={`${item.project} preview`}
+                                      className={`h-12 w-16 flex-shrink-0 rounded-md object-cover ${
+                                        media.isMain ? "ring-2 ring-[#29ddda]/70" : ""
+                                      }`}
+                                    />
                                   );
-                                }
-                                return (
-                                  <img
-                                    key={`${item.id}-preview-${media.id}`}
-                                    src={media.image}
-                                    alt={`${item.project} preview`}
-                                    className={`h-12 w-16 flex-shrink-0 rounded-md object-cover ${
-                                      media.isMain ? "ring-2 ring-[#29ddda]/70" : ""
-                                    }`}
-                                  />
-                                );
-                              })}
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">{item.options.length} options</td>
-                        <td className="px-4 py-3">${item.startingPrice.toLocaleString()}</td>
-                        <td className="px-4 py-3">{chipukutu ? "40% by option" : "20% by option"}</td>
-                        <td className="px-4 py-3">
-                          <button onClick={() => openEdit(item)} className="mr-2 rounded p-2 hover:bg-blue-50"><Edit className="h-4 w-4 text-blue-600" /></button>
-                          <button onClick={() => deleteSuperstructure(item.id)} className="rounded p-2 hover:bg-red-50"><Trash2 className="h-4 w-4 text-red-600" /></button>
-                        </td>
-                      </tr>
-                    )})}
-                  </tbody>
-                </table>
+                          </td>
+                          <td className="px-4 py-3">{item.options.length} options</td>
+                          <td className="px-4 py-3">${item.startingPrice.toLocaleString()}</td>
+                          <td className="px-4 py-3">{chipukutu ? "40% by option" : "20% by option"}</td>
+                          <td className="px-4 py-3">
+                            <button onClick={() => openEdit(item)} className="mr-2 rounded p-2 hover:bg-blue-50"><Edit className="h-4 w-4 text-blue-600" /></button>
+                            <button onClick={() => deleteSuperstructure(item.id)} className="rounded p-2 hover:bg-red-50"><Trash2 className="h-4 w-4 text-red-600" /></button>
+                          </td>
+                        </tr>
+                      )})}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 
@@ -644,26 +648,28 @@ export default function AdminDashboard() {
             {tab === "bookings" && (
               <div className="p-6">
                 <h2 className="mb-6 text-2xl font-bold text-gray-900">Bookings</h2>
-                <table className="w-full">
-                  <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Email</th><th className="px-4 py-3 text-left">Site Visit Date</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
-                  <tbody>
-                    {bookings.map((b) => (
-                      <tr key={b.id} className="border-b">
-                        <td className="px-4 py-3">{b.name}</td>
-                        <td className="px-4 py-3">{b.email}</td>
-                        <td className="px-4 py-3">{formatVisitDate(b.preferred_date)}</td>
-                        <td className="px-4 py-3">{b.status}</td>
-                        <td className="px-4 py-3">
-                          <select value={b.status} onChange={(e) => updateBooking(b.id, e.target.value)} className="rounded border px-2 py-1 text-xs">
-                            <option value="pending">Pending</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px]">
+                    <thead><tr className="border-b"><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Email</th><th className="px-4 py-3 text-left">Site Visit Date</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Actions</th></tr></thead>
+                    <tbody>
+                      {bookings.map((b) => (
+                        <tr key={b.id} className="border-b">
+                          <td className="px-4 py-3">{b.name}</td>
+                          <td className="px-4 py-3">{b.email}</td>
+                          <td className="px-4 py-3">{formatVisitDate(b.preferred_date)}</td>
+                          <td className="px-4 py-3">{b.status}</td>
+                          <td className="px-4 py-3">
+                            <select value={b.status} onChange={(e) => updateBooking(b.id, e.target.value)} className="rounded border px-2 py-1 text-xs">
+                              <option value="pending">Pending</option>
+                              <option value="confirmed">Confirmed</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 

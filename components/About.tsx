@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { CheckCircle, Award, Users, MapPin, CreditCard, Shield, TrendingUp, Clock } from "lucide-react";
 
 const whyChooseShelter = [
@@ -13,11 +14,17 @@ const whyChooseShelter = [
 ];
 
 export default function About() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  const cardY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const blobY1 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
+  const blobY2 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+
   return (
-    <section id="about" className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-white py-12 sm:py-14">
+    <section ref={sectionRef} id="about" className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-white py-12 sm:py-14">
       {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2" style={{ backgroundColor: '#2652a2' }}></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2" style={{ backgroundColor: '#29ddda' }}></div>
+      <motion.div style={{ y: blobY1, backgroundColor: '#2652a2' }} className="absolute top-0 left-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></motion.div>
+      <motion.div style={{ y: blobY2, backgroundColor: '#29ddda' }} className="absolute bottom-0 right-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2"></motion.div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
@@ -65,6 +72,7 @@ export default function About() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            style={{ y: cardY }}
             className="relative"
           >
             <div className="relative overflow-hidden rounded-2xl p-4 shadow-xl sm:p-6 lg:p-8" style={{ background: 'linear-gradient(135deg, #2652a2, #00aeed, #29ddda)' }}>

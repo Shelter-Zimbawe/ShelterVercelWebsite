@@ -84,14 +84,15 @@ export default function Features() {
             return (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group relative rounded-2xl border border-gray-200 bg-white p-5 shadow-md transition-all duration-300 hover:shadow-lg sm:p-6 lg:p-8"
+                initial={{ opacity: 0, y: 36, scale: 0.94 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                whileHover={{ y: -8, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className="group relative rounded-2xl border border-gray-200 bg-white p-5 shadow-md transition-shadow duration-300 hover:shadow-xl sm:p-6 lg:p-8"
               >
                 <div
-                  className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl sm:mb-6 sm:h-16 sm:w-16"
+                  className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-3 sm:mb-6 sm:h-16 sm:w-16"
                   style={{ background: 'linear-gradient(135deg, #2652a2, #29ddda)' }}
                 >
                   <Icon className="h-7 w-7 text-white sm:h-8 sm:w-8" />

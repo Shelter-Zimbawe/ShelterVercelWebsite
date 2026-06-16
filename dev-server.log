@@ -1,0 +1,14 @@
+
+> shelter-website@1.0.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 10.2s
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 32.6s (1182 modules)
+ GET /staff-login 404 in 34344ms
+ ✓ Compiled in 1532ms (600 modules)

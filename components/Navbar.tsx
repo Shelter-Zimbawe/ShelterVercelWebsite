@@ -67,6 +67,7 @@ export default function Navbar() {
     { name: "Home", href: isHome ? "#home" : "/#home" },
     { name: "Features", href: isHome ? "#features" : "/#features" },
     { name: "Products", href: isHome ? "#products" : "/#products" },
+    { name: "Locations", href: isHome ? "#locations" : "/#locations" },
     { name: "Superstructures", href: isHome ? "#superstructures" : "/#superstructures" },
     { name: "About", href: isHome ? "#about" : "/#about" },
     { name: "Testimonials", href: isHome ? "#testimonials" : "/#testimonials" },

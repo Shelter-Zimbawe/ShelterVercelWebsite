@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+  title: "Shelter Zimbabwe | Residential Stands & Land for Sale in Harare",
+  description:
+    "Buy residential stands in Harare from Zimbabwe's most trusted property developer. Rockview Park, Adelaide Park, Mabvuku Chizhanje and more. Flexible payment plans. Book a site visit today.",
+  alternates: { canonical: "https://shelter.co.zw" },
+};
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import ProductGallery from "@/components/ProductGallery";
+import LocationsMap from "@/components/LocationsMap";
 import SuperstructuresSection from "@/components/SuperstructuresSection";
 import About from "@/components/About";
 import Testimonials from "@/components/Testimonials";
@@ -22,6 +31,9 @@ export default function Home() {
       </ScrollRevealSection>
       <ScrollRevealSection delay={0.05}>
         <ProductGallery />
+      </ScrollRevealSection>
+      <ScrollRevealSection delay={0.06}>
+        <LocationsMap />
       </ScrollRevealSection>
       <ScrollRevealSection delay={0.08}>
         <SuperstructuresSection />
