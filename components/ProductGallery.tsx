@@ -55,6 +55,41 @@ function truncateDescription(value: string) {
   return value.length > 120 ? `${value.slice(0, 117)}...` : value;
 }
 
+function isOutOfStock(stand: Stand) {
+  return stand.available === false;
+}
+
+function OutOfStockStamp({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const scale =
+    size === "lg" ? "min-w-[200px] px-5 py-3 text-base sm:text-lg" : size === "sm" ? "min-w-[140px] px-3 py-2 text-[11px]" : "min-w-[168px] px-4 py-2.5 text-sm";
+
+  return (
+    <div
+      className={`pointer-events-none select-none rounded-md border-[3px] border-double text-center font-black uppercase tracking-[0.18em] shadow-lg ${scale}`}
+      style={{
+        color: "#2652a2",
+        borderColor: "#2652a2",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.92), rgba(41,221,218,0.22))",
+        boxShadow: "0 8px 24px rgba(38, 82, 162, 0.28), inset 0 0 0 1px rgba(0, 174, 237, 0.45)",
+        transform: "rotate(-12deg)",
+      }}
+      aria-hidden
+    >
+      <span
+        className="block leading-tight"
+        style={{
+          backgroundImage: "linear-gradient(90deg, #2652a2, #00aeed, #2652a2)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+        }}
+      >
+        Out Of Stock
+      </span>
+    </div>
+  );
+}
+
 export default function ProductGallery() {
   const [standProducts, setStandProducts] = useState<Stand[]>([]);
   const [selectedStand, setSelectedStand] = useState<Stand | null>(null);
@@ -92,6 +127,7 @@ export default function ProductGallery() {
   };
 
   const openModal = (stand: Stand) => {
+    if (isOutOfStock(stand)) return;
     setSelectedStand(stand);
   };
 
@@ -100,12 +136,14 @@ export default function ProductGallery() {
   };
 
   const openBookingModal = (stand: Stand) => {
+    if (isOutOfStock(stand)) return;
     setBookingStand(stand);
     setShowBookingForm(true);
     setSelectedStand(null);
   };
 
   const startPurchase = (stand: Stand) => {
+    if (isOutOfStock(stand)) return;
     const message = `How are you Shelter , I wanted to inquire on ${stand.name} in ${stand.location} (starting from ${formatCurrency(stand.minimumPrice)}).`;
     window.open(`https://wa.me/263719551234?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -154,50 +192,70 @@ export default function ProductGallery() {
         ) : (
           <div className="overflow-x-auto pb-4">
             <div className="flex min-w-max gap-6 pr-2">
-              {standProducts.map((product, index) => (
+              {standProducts.map((product, index) => {
+                const outOfStock = isOutOfStock(product);
+                return (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -8 }}
-                  className="group relative w-[300px] flex-shrink-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:border-[#2652a2] hover:shadow-xl sm:w-[340px] lg:w-[360px]"
+                  whileHover={outOfStock ? undefined : { y: -8 }}
+                  className={`group relative w-[300px] flex-shrink-0 overflow-hidden rounded-3xl border bg-white p-6 shadow-sm transition-all duration-300 sm:w-[340px] lg:w-[360px] ${
+                    outOfStock
+                      ? "border-slate-200"
+                      : "border-slate-200 hover:border-[#2652a2] hover:shadow-xl"
+                  }`}
                 >
                   <div
                     className="absolute inset-x-0 top-0 h-1 rounded-t-3xl"
                     style={{ background: "linear-gradient(90deg, #2652a2, #00aeed, #29ddda)" }}
                   />
 
-                  <div
-                    className="mb-5 h-52 rounded-2xl bg-cover bg-center"
-                    style={{ backgroundImage: `url(${product.image})` }}
-                  />
+                  <div className="relative mb-5 h-52 overflow-hidden rounded-2xl">
+                    <div
+                      className={`absolute inset-0 bg-cover bg-center transition duration-300 ${
+                        outOfStock ? "scale-105 blur-[2.5px] saturate-75" : ""
+                      }`}
+                      style={{ backgroundImage: `url(${product.image})` }}
+                    />
+                    {outOfStock && (
+                      <>
+                        <div className="absolute inset-0 bg-white/35" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <OutOfStockStamp />
+                        </div>
+                      </>
+                    )}
+                  </div>
 
                   <div className="mb-5 flex items-start justify-between gap-3">
                     <div>
                       <h3 className="mb-2 text-2xl font-bold text-slate-900">{product.name}</h3>
-                      <p className="max-w-md text-sm leading-6 text-slate-600">
+                      <p className={`max-w-md text-sm leading-6 text-slate-600 ${outOfStock ? "opacity-80" : ""}`}>
                         {truncateDescription(product.description)}
                       </p>
                     </div>
                     <span
                       className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                        completionClasses[product.completionStatus] || completionClasses.Ready
+                        outOfStock
+                          ? "border-[#2652a2]/30 bg-[#2652a2]/10 text-[#2652a2]"
+                          : completionClasses[product.completionStatus] || completionClasses.Ready
                       }`}
                     >
-                      {product.completionStatus}
+                      {outOfStock ? "Out Of Stock" : product.completionStatus}
                     </span>
                   </div>
 
                   <div className="mb-5 space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <MapPin className="h-4 w-4 text-[#2652a2]" />
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
+                      <MapPin className="h-4 w-4 shrink-0 text-[#2652a2]" />
                       <span>
                         {product.location} ({product.direction})
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <div className={`flex items-center gap-2 text-sm text-slate-600 ${outOfStock ? "opacity-75" : ""}`}>
                       <CheckCircle2 className="h-4 w-4 text-[#2652a2]" />
                       <span>Completion: {product.completionStatus}</span>
                     </div>
@@ -207,30 +265,49 @@ export default function ProductGallery() {
                     <div className="text-sm font-medium uppercase tracking-[0.14em] text-slate-500">
                       Starting Price
                     </div>
-                    <div className="mt-1 text-3xl font-bold text-[#2652a2]">
+                    <div
+                      className={`mt-1 text-3xl font-bold text-[#2652a2] ${
+                        outOfStock ? "select-none blur-[6px] opacity-60" : ""
+                      }`}
+                      aria-hidden={outOfStock}
+                    >
                       {formatCurrency(product.minimumPrice)}
                     </div>
                   </div>
 
                   <div className="flex justify-end">
-                    <button
-                      onClick={() => openModal(product)}
-                      className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg"
-                      style={{ background: "linear-gradient(135deg, #2652a2, #00aeed, #29ddda)" }}
-                    >
-                      View Details
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
+                    {outOfStock ? (
+                      <button
+                        type="button"
+                        disabled
+                        aria-disabled="true"
+                        className="inline-flex cursor-not-allowed items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400"
+                      >
+                        View Details
+                        <ArrowRight className="h-4 w-4 opacity-50" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openModal(product)}
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg"
+                        style={{ background: "linear-gradient(135deg, #2652a2, #00aeed, #29ddda)" }}
+                      >
+                        View Details
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </motion.div>
-              ))}
+              );
+              })}
             </div>
           </div>
         )}
       </div>
 
       {/* Modal */}
-      {selectedStand && (
+      {selectedStand && !isOutOfStock(selectedStand) && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -254,18 +331,32 @@ export default function ProductGallery() {
 
             <div className="grid gap-6 p-4 sm:gap-8 sm:p-6 md:p-8 xl:grid-cols-[320px_minmax(0,1fr)]">
               <div className="space-y-6">
-                <div
-                  className="h-52 rounded-2xl bg-cover bg-center sm:h-64 sm:rounded-3xl"
-                  style={{ backgroundImage: `url(${selectedStand.image})` }}
-                />
+                <div className="relative h-52 overflow-hidden rounded-2xl sm:h-64 sm:rounded-3xl">
+                  <div
+                    className={`absolute inset-0 bg-cover bg-center ${
+                      isOutOfStock(selectedStand) ? "scale-105 blur-[2.5px] saturate-75" : ""
+                    }`}
+                    style={{ backgroundImage: `url(${selectedStand.image})` }}
+                  />
+                  {isOutOfStock(selectedStand) && (
+                    <>
+                      <div className="absolute inset-0 bg-white/35" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <OutOfStockStamp size="lg" />
+                      </div>
+                    </>
+                  )}
+                </div>
 
                 <div>
                   <span
                     className={`mb-4 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
-                      completionClasses[selectedStand.completionStatus] || completionClasses.Ready
+                      isOutOfStock(selectedStand)
+                        ? "border-[#2652a2]/30 bg-[#2652a2]/10 text-[#2652a2]"
+                        : completionClasses[selectedStand.completionStatus] || completionClasses.Ready
                     }`}
                   >
-                    {selectedStand.completionStatus}
+                    {isOutOfStock(selectedStand) ? "Out Of Stock" : selectedStand.completionStatus}
                   </span>
                   <h3 className="mb-3 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
                     {selectedStand.name}
@@ -301,7 +392,7 @@ export default function ProductGallery() {
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className={`space-y-4 ${isOutOfStock(selectedStand) ? "opacity-80" : ""}`}>
                     {selectedStand.plots.map((plot) => (
                       <div
                         key={plot.id}
@@ -364,21 +455,30 @@ export default function ProductGallery() {
                   </div>
                 </div>
 
-                <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                  <button
-                    onClick={() => startPurchase(selectedStand)}
-                    className="flex-1 rounded-2xl border border-[#2652a2]/20 bg-white px-6 py-4 font-semibold text-[#2652a2] transition hover:bg-[#2652a2]/5"
-                  >
-                    Get in Touch with Sales
-                  </button>
-                  <button
-                    onClick={() => openBookingModal(selectedStand)}
-                    className="flex-1 rounded-2xl px-6 py-4 font-semibold text-white transition hover:shadow-lg"
-                    style={{ background: "linear-gradient(135deg, #2652a2, #00aeed, #29ddda)" }}
-                  >
-                    Book a Visit
-                  </button>
-                </div>
+                {isOutOfStock(selectedStand) ? (
+                  <div className="mt-8 rounded-2xl border border-[#2652a2]/20 bg-[#2652a2]/5 px-6 py-5 text-center">
+                    <p className="text-base font-semibold text-[#2652a2]">This stand is currently out of stock</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {selectedStand.name} in {selectedStand.location} is not available for booking right now.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                    <button
+                      onClick={() => startPurchase(selectedStand)}
+                      className="flex-1 rounded-2xl border border-[#2652a2]/20 bg-white px-6 py-4 font-semibold text-[#2652a2] transition hover:bg-[#2652a2]/5"
+                    >
+                      Get in Touch with Sales
+                    </button>
+                    <button
+                      onClick={() => openBookingModal(selectedStand)}
+                      className="flex-1 rounded-2xl px-6 py-4 font-semibold text-white transition hover:shadow-lg"
+                      style={{ background: "linear-gradient(135deg, #2652a2, #00aeed, #29ddda)" }}
+                    >
+                      Book a Visit
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -387,7 +487,7 @@ export default function ProductGallery() {
 
       {/* Booking Form Modal */}
       <AnimatePresence>
-        {showBookingForm && (
+        {showBookingForm && bookingStand && !isOutOfStock(bookingStand) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
