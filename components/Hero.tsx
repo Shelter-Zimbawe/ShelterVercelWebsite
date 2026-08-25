@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Home, Award, TrendingUp, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Home, Award, TrendingUp, Building2, ChevronLeft, ChevronRight, Smartphone, CreditCard, CalendarCheck, Search, Download } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BookingForm from "./BookingForm";
@@ -48,8 +48,9 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative w-full overflow-hidden"
-      style={{ minHeight: "640px" }}
+      className={`relative w-full overflow-hidden ${
+        current === "etosha3d" ? "min-h-[100svh] md:min-h-[640px]" : "min-h-[640px]"
+      }`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -246,87 +247,195 @@ export default function Hero() {
             animate="center"
             exit="exit"
             transition={{ duration: 0.7, ease: [0.77, 0, 0.175, 1] }}
-            className="absolute inset-0"
+            className="absolute inset-0 overflow-y-auto md:overflow-hidden"
           >
-            {/* Full-bleed 3D render background */}
-            <img
-              src="/etosha/3d-view.jpeg"
-              alt="Etosha 3D masterplan"
-              className="absolute inset-0 h-full w-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = "none";
-                const parent = e.currentTarget.parentElement;
-                if (parent) parent.style.background = "linear-gradient(135deg,#0d1f4a 0%,#1a3d8a 50%,#00aeed22 100%)";
-              }}
-            />
+            {/* Light gradient background — matches slide 1 */}
+            <div className="absolute inset-0" style={{ background: "linear-gradient(90deg,#ffffff 0%,#f9fcff 54%,#eef8ff 74%,#dff6fb 100%)" }} />
 
-            {/* Layered overlays for depth + readability */}
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to right,rgba(3,9,31,0.78) 0%,rgba(3,9,31,0.45) 45%,rgba(3,9,31,0.15) 100%)" }} />
+            {/* Soft blue glow — right side */}
+            <div className="absolute inset-y-0 right-0 hidden w-[42%] pointer-events-none md:block" style={{ background: "radial-gradient(circle at 82% 50%,rgba(0,174,237,0.18) 0%,rgba(41,221,218,0.10) 28%,rgba(38,82,162,0.05) 48%,rgba(255,255,255,0) 72%)" }} />
+            {/* Soft blue glow — left behind phone */}
+            <div className="absolute inset-y-0 left-0 hidden w-[36%] pointer-events-none md:block" style={{ background: "radial-gradient(circle at 30% 55%,rgba(0,174,237,0.10) 0%,rgba(41,221,218,0.06) 30%,rgba(255,255,255,0) 60%)" }} />
+            {/* Top/bottom white fade */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to bottom,rgba(255,255,255,0.96) 0%,rgba(255,255,255,0.35) 10%,rgba(255,255,255,0) 18%,rgba(255,255,255,0) 82%,rgba(255,255,255,0.35) 90%,rgba(255,255,255,0.96) 100%)" }} />
+            {/* Mobile overlay */}
+            <div className="absolute inset-0 pointer-events-none bg-white/40 md:hidden" />
 
-            {/* Small Etosha logo tile */}
-            <div className="absolute right-6 top-24 z-20 sm:right-10">
-              <img src="/etosha-logo.png" alt="Etosha" className="h-10 w-auto object-contain opacity-90" />
-            </div>
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom,rgba(3,9,31,0.6) 0%,rgba(3,9,31,0) 25%,rgba(3,9,31,0) 70%,rgba(3,9,31,0.7) 100%)" }} />
-            {/* Blue glow accent */}
-            <div className="pointer-events-none absolute right-0 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full opacity-20" style={{ background: "radial-gradient(circle,#00aeed 0%,transparent 65%)" }} />
-
-            <div className="relative z-10 flex min-h-[640px] w-full items-center">
+            <div className="relative z-10 flex min-h-full w-full items-start md:min-h-[640px] md:items-center">
               <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="max-w-[580px] pb-14 pt-28 sm:pt-32 md:pt-36">
+                <div className="grid items-center gap-5 pb-16 pt-24 sm:gap-6 sm:pb-14 sm:pt-28 md:grid-cols-[auto_1fr_auto] md:gap-10 md:pt-36 lg:gap-14">
 
-                  {/* Badge */}
-                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em]" style={{ borderColor: "rgba(0,174,237,0.4)", color: "#00aeed", background: "rgba(0,174,237,0.1)" }}>
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
-                    </svg>
-                    Etosha — 3D Masterplan View
-                  </div>
+                  {/* ── LEFT: Phone showcase ── */}
+                  <div className="relative order-2 mx-auto flex max-w-[220px] items-center justify-center sm:max-w-none md:order-1 md:mx-0 md:min-w-[280px]">
 
-                  {/* Headline */}
-                  <h1 className="mb-4 text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl">
-                    See the Vision<br />
-                    <span style={{ background: "linear-gradient(90deg,#00aeed,#29ddda)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                      Before You Invest
-                    </span>
-                  </h1>
+                    {/* Decorative ring */}
+                    <div className="absolute hidden h-[320px] w-[320px] rounded-full border opacity-[0.07] sm:block sm:h-[400px] sm:w-[400px]" style={{ borderColor: "#2652a2", borderWidth: "2px" }} />
+                    <div className="absolute hidden h-[370px] w-[370px] rounded-full border opacity-[0.04] sm:block sm:h-[460px] sm:w-[460px]" style={{ borderColor: "#00aeed", borderWidth: "1.5px" }} />
 
-                  <p className="mb-8 max-w-md text-base leading-relaxed text-white/65 sm:text-lg">
-                    Explore the full Etosha memorial park layout in stunning 3D detail — every plot, pathway, and green space designed with care and precision.
-                  </p>
+                    {/* Soft gradient glow */}
+                    <div className="absolute h-[200px] w-[140px] rounded-[40px] opacity-[0.15] blur-3xl sm:h-[360px] sm:w-[260px]" style={{ background: "linear-gradient(160deg, #00aeed 0%, #2652a2 60%, #29ddda 100%)" }} />
 
-                  {/* Stats row */}
-                  <div className="mb-8 flex flex-wrap gap-5">
-                    {[
-                      { value: "500+", label: "Landscaped Plots" },
-                      { value: "24/7", label: "Peaceful Access" },
-                      { value: "100%", label: "Secured Estate" },
-                    ].map((s) => (
-                      <div key={s.label}>
-                        <div className="text-2xl font-extrabold text-white sm:text-3xl" style={{ background: "linear-gradient(90deg,#fff,#29ddda)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{s.value}</div>
-                        <div className="text-xs font-semibold text-white/45">{s.label}</div>
+                    {/* Main image in a styled frame */}
+                    <motion.div
+                      className="relative z-10 overflow-hidden rounded-[22px] border-[3px] border-white shadow-2xl sm:rounded-[32px]"
+                      style={{ boxShadow: "0 25px 60px rgba(38,82,162,0.20), 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(38,82,162,0.06)" }}
+                      initial={{ y: 20, opacity: 0, scale: 0.97 }}
+                      animate={{ y: 0, opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                    >
+                      <img
+                        src="/etoshamobile.png"
+                        alt="Etosha Mobile App"
+                        className="h-[210px] w-auto sm:h-[340px] md:h-[400px]"
+                      />
+                      {/* Subtle gradient overlay on bottom edge */}
+                      <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(38,82,162,0.06), transparent)" }} />
+                    </motion.div>
+
+                    {/* Floating badge — top right */}
+                    <motion.div
+                      className="absolute -right-2 top-6 z-20 hidden items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 shadow-lg sm:flex sm:-right-5 sm:top-12"
+                      style={{ borderColor: "rgba(41,221,218,0.2)" }}
+                      initial={{ x: 20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
+                    >
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: "linear-gradient(135deg,#2652a2,#00aeed)" }}>
+                        <CreditCard className="h-3 w-3 text-white" />
                       </div>
-                    ))}
+                      <span className="text-[11px] font-bold text-slate-700">Easy Pay</span>
+                    </motion.div>
+
+                    {/* Floating badge — bottom left */}
+                    <motion.div
+                      className="absolute -left-2 bottom-10 z-20 hidden items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 shadow-lg sm:flex sm:-left-4 sm:bottom-16"
+                      style={{ borderColor: "rgba(41,221,218,0.2)" }}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.9, ease: "easeOut" }}
+                    >
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: "linear-gradient(135deg,#00aeed,#29ddda)" }}>
+                        <CalendarCheck className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-700">Book Now</span>
+                    </motion.div>
+
+                    {/* Live dot badge — top left */}
+                    <motion.div
+                      className="absolute left-1 top-3 z-20 flex items-center gap-1.5 rounded-full border bg-white/95 px-2.5 py-1 shadow-md backdrop-blur-sm sm:left-0 sm:top-6"
+                      style={{ borderColor: "rgba(38,82,162,0.1)" }}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 1.1, ease: "easeOut" }}
+                    >
+                      <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "linear-gradient(135deg,#29ddda,#00aeed)" }} />
+                      <span className="text-[10px] font-semibold text-slate-500">Live</span>
+                    </motion.div>
+
                   </div>
 
-                  <div className="flex flex-col gap-4 sm:flex-row">
+                  {/* ── CENTER: Content ── */}
+                  <div className="order-1 text-center md:order-2 md:text-left">
+                    {/* Badge */}
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] shadow-sm backdrop-blur-sm sm:mb-5 sm:px-4 sm:text-xs sm:tracking-[0.25em]" style={{ borderColor: "rgba(38,82,162,0.12)", color: "#2652a2" }}>
+                      <Smartphone className="h-3.5 w-3.5" style={{ color: "#00aeed" }} />
+                      Introducing Etosha Mobile
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="mb-3 text-[1.85rem] font-bold leading-[1.05] text-slate-900 sm:mb-4 sm:text-4xl md:text-5xl">
+                      <span className="block">Etosha at your</span>
+                      <span className="block" style={{ color: "#2652a2" }}>Fingertips</span>
+                    </h1>
+
+                    <p className="mx-auto mb-5 max-w-md text-sm leading-relaxed text-slate-600 sm:mb-7 sm:text-lg md:mx-0">
+                      Pay plans, start new ones, browse services, and book. All via the{" "}
+                      <span className="font-semibold text-slate-800">Etosha Mobile App.</span>
+                      <br className="hidden sm:block" />
+                      <span className="mt-1 block text-sm text-slate-400 sm:mt-0 sm:inline sm:text-base"> From the comfort of your home, everything you need is one tap away.</span>
+                    </p>
+
+                    {/* Mobile download CTA — shown before features on small screens */}
                     <a
-                      href={ETOSHA_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.03]"
-                      style={{ background: "linear-gradient(135deg,#2652a2,#00aeed,#29ddda)", boxShadow: "0 12px 40px rgba(0,174,237,0.3)" }}
+                      href="https://online.etoshagms.co.zw/app/etosha-gardens.apk"
+                      className="group mb-5 inline-flex w-full max-w-md items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:mb-7 md:hidden"
+                      style={{ background: "linear-gradient(135deg,#2652a2,#00aeed,#29ddda)" }}
                     >
-                      Explore Etosha
-                      <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      <Download className="h-4 w-4" />
+                      Download Now
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </a>
-                    <button
-                      onClick={() => setShowBookingForm(true)}
-                      className="inline-flex items-center justify-center rounded-2xl border-2 px-7 py-4 text-base font-semibold text-white transition-all duration-200 hover:bg-white/10"
-                      style={{ borderColor: "rgba(255,255,255,0.3)" }}
+
+                    {/* Feature cards */}
+                    <div className="mx-auto mb-4 grid max-w-md grid-cols-2 gap-2 sm:mb-7 sm:gap-2.5 md:mx-0">
+                      {[
+                        { icon: CreditCard, label: "Pay Plans", desc: "Convenient payments" },
+                        { icon: Search, label: "Browse Services", desc: "Explore offerings" },
+                        { icon: CalendarCheck, label: "Book Services", desc: "Reserve instantly" },
+                        { icon: TrendingUp, label: "Track Progress", desc: "Stay up to date" },
+                      ].map((f) => {
+                        const Icon = f.icon;
+                        return (
+                          <div key={f.label} className="flex items-center gap-2.5 rounded-2xl border bg-white/80 px-3 py-2.5 shadow-sm backdrop-blur-sm sm:gap-3 sm:px-3.5 sm:py-3" style={{ borderColor: "rgba(41,221,218,0.16)" }}>
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9" style={{ background: "linear-gradient(135deg, rgba(38,82,162,0.08), rgba(0,174,237,0.10))" }}>
+                              <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: "#2652a2" }} />
+                            </div>
+                            <div className="min-w-0 text-left">
+                              <div className="truncate text-xs font-semibold text-slate-800 sm:text-sm">{f.label}</div>
+                              <div className="truncate text-[10px] text-slate-400 sm:text-[11px]">{f.desc}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Android platform badge */}
+                    <div className="flex items-center justify-center gap-2 md:justify-start">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-md" style={{ background: "rgba(61,220,132,0.12)" }}>
+                        <svg viewBox="0 0 24 24" className="h-3 w-3" fill="#3DDC84">
+                          <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0012 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 006 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z" />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-medium text-slate-400">Available on Android</span>
+                    </div>
+                  </div>
+
+                  {/* ── RIGHT: QR Code + Download (desktop) ── */}
+                  <div className="order-3 mx-auto hidden flex-col items-center gap-4 md:mx-0 md:flex">
+                    {/* Etosha logo */}
+                    <img src="/etosha-logo.png" alt="Etosha" className="h-14 w-auto object-contain" />
+                    {/* QR card */}
+                    <div className="rounded-3xl border bg-white/80 p-5 shadow-sm backdrop-blur-md" style={{ borderColor: "rgba(38,82,162,0.10)" }}>
+                      <div className="rounded-2xl border bg-white p-3" style={{ borderColor: "rgba(38,82,162,0.06)" }}>
+                        <img
+                          src="/etosha-gardens-apk-qr.png"
+                          alt="Scan to download Etosha Mobile"
+                          className="h-[150px] w-[150px] object-contain"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = "none";
+                            const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (placeholder) placeholder.style.display = "flex";
+                          }}
+                        />
+                        <div className="hidden h-[150px] w-[150px] flex-col items-center justify-center gap-2">
+                          <Download className="h-8 w-8 text-slate-300" />
+                          <span className="text-[10px] font-semibold text-slate-400">QR Code</span>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400">Scan to download</p>
+                    </div>
+
+                    <a
+                      href="https://online.etoshagms.co.zw/app/etosha-gardens.apk"
+                      className="group inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:shadow-xl"
+                      style={{ background: "linear-gradient(135deg,#2652a2,#00aeed,#29ddda)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
                     >
-                      Book a Site Visit
-                    </button>
+                      <Download className="h-4 w-4" />
+                      Download Now
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </a>
                   </div>
 
                 </div>

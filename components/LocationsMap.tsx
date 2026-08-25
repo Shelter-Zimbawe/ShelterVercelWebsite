@@ -84,8 +84,8 @@ export default function LocationsMap() {
             Our Stands Across <span style={{ color: "#2652a2" }}>Zimbabwe</span>
           </h2>
           <p className="text-base text-gray-600 sm:text-lg">
-            Every Shelter development sits in a carefully chosen growth corridor in and around Harare —
-            explore the live map or tap a location below to zoom straight there.
+            Every Shelter development sits in a carefully chosen growth corridor in and around Harare.
+            Explore the live map or tap a location below to zoom straight there.
           </p>
         </motion.div>
 

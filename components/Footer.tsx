@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Facebook, Twitter, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import PrivacyPolicyModal from "./PrivacyPolicyModal";
 
 function FeedbackWidget() {
   const [rating, setRating] = useState(0);
@@ -114,6 +115,8 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+
   return (
     <footer className="bg-gradient-to-b from-slate-900 to-black text-gray-300 relative overflow-hidden">
       {/* Decorative pattern */}
@@ -236,9 +239,18 @@ export default function Footer() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-gray-800 pt-8 md:flex-row md:items-center"
         >
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Shelter Zimbabwe. All rights reserved.
-          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <p className="text-sm text-gray-400">
+              © {new Date().getFullYear()} Shelter Zimbabwe. All rights reserved.
+            </p>
+            <button
+              type="button"
+              onClick={() => setPrivacyOpen(true)}
+              className="text-left text-sm text-gray-400 transition-colors duration-200 hover:text-white"
+            >
+              Privacy Policy
+            </button>
+          </div>
           <div className="mt-2 flex gap-4 md:mt-0">
             {socialLinks.map((social) => {
               const Icon = social.icon;
@@ -269,6 +281,7 @@ export default function Footer() {
       >
         <WhatsAppIcon className="h-7 w-7 text-white" />
       </a>
+      <PrivacyPolicyModal open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
     </footer>
   );
 }
