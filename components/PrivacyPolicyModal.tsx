@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Shield } from "lucide-react";
 
-const LAST_UPDATED = "25 August 2026";
+const LAST_UPDATED = "29 September 2026";
 
 const definitionItems = [
   { term: "Account", text: "A unique account created for You to access our Service or parts of our Service." },
@@ -203,11 +203,20 @@ function PrivacyPolicyContent() {
           <p>All employees, consultants, contractors, and service providers are required to maintain the confidentiality of personal information and may only process such information for authorised purposes.</p>
         </Section>
 
-        <Section title="15. Changes to this Privacy Policy">
+        <Section title="15. Data Breach Notification">
+          <p>
+            In the event of a data breach, we are legally obliged to notify the Data Protection
+            Authority (POTRAZ) within twenty four (24) hours of becoming aware of the incident. Where
+            the breach is likely to result in a high risk to your rights and freedoms, we will also
+            inform affected data subjects within seventy two (72) hours.
+          </p>
+        </Section>
+
+        <Section title="16. Changes to this Privacy Policy">
           <p>We may amend this Privacy Policy from time to time to reflect changes in legal requirements, business operations, or technology. The latest version will be made available through our offices and, where applicable, on our website.</p>
         </Section>
 
-        <Section title="16. Complaints">
+        <Section title="17. Complaints">
           <p>
             If you believe that your personal information has been handled improperly, you may submit a
             complaint to the Organisation using the contact details above. We will investigate your
@@ -216,7 +225,7 @@ function PrivacyPolicyContent() {
           </p>
         </Section>
 
-        <Section title="17. Contact Us">
+        <Section title="18. Contact Us">
           <p>If you have any questions about this Privacy Policy or wish to exercise your privacy rights, please contact:</p>
           <div className="rounded-2xl border border-[#2652a2]/20 bg-[#2652a2]/5 p-4 text-slate-700 sm:p-5">
             <p><span className="font-semibold text-slate-900">Physical Address:</span> Shelter House, 95 Fife Avenue, Harare</p>
