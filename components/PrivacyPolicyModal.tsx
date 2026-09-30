@@ -237,7 +237,7 @@ function PrivacyPolicyContent() {
             </p>
             <p className="mt-2">
               <span className="font-semibold text-slate-900">Email:</span>{" "}
-              <a href="mailto:sales@shelter.co.zw" className="text-[#2652a2] hover:underline">sales@shelter.co.zw</a>
+              <a href="mailto:dpo@shelter.co.zw" className="text-[#2652a2] hover:underline">sales@shelter.co.zw</a>
             </p>
           </div>
         </Section>
